@@ -8,4 +8,3 @@ class ColTypes:
 
     def get_coltypes(self):
         return self.coltypes
- 
