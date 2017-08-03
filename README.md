@@ -54,6 +54,27 @@ col_types.add_coltype('ips', 'faker', provider='ipv6')
 data_set = sm.create(1000, coltypes=col_types.get_coltypes())
 ```
 
+For a quick demonstration, if you don't specify any types a dataframe is created with one of each of the available types:
+
+```python
+import simulacrum as sm
+data_set = sm.create()
+list(df.iterrows())[0][1]
+#addr      55752 Clifford Crest Apt. 617\nBrownview, CA 7...
+#bin                                                      16
+#coords                      (-73.4784872076, 38.9711531723)
+#date                                    2017-02-15 20:42:52
+#exp                                                 2.45768
+#int                                                      88
+#name                                           Katelyn Tran
+#norm                                               -2.36078
+#num                                                0.150451
+#pois                                                      1
+#txt       Possimus voluptas similique vel. Veritatis fac...
+#uuid                   64db0551-9a36-4ab7-adc5-942016735f51
+#Name: 0, dtype: object
+```
+
 #### faker type:
 
 If you want to use other data types not allowed in simulacrum by default, you can use the `faker` type to use each data type provided by the awesome faker library.
