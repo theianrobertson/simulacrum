@@ -65,7 +65,7 @@ To use the faker type, you have to pass the provider name and optional args like
 ```python
 faker_examples = {
         # same as fake.simple_profile(sex='F')
-        'names': {'type': 'name', 'provider': 'simple_profile', 'sex': 'F'},
+        'names': {'type': 'faker', 'provider': 'simple_profile', 'sex': 'F'},
         # same as fake.ipv6()
         'ips': {'type': 'faker', 'provider': 'ipv6'},
         # same as fake.job()
