@@ -77,12 +77,12 @@ def test_num_int():
     assert nums.dtype == np.dtype('int')
 
 def test_norm_data():
-    nums = types.norm_data(1000, mean=0, stdev=100)
+    nums = types.norm_data(1000, mean=0, sd=100)
     assert len(nums) == 1000
     assert nums.dtype == np.dtype('float')
 
 def test_exp_data():
-    nums = types.exp_data(1000, scale=10)
+    nums = types.exp_data(1000, lam=10)
     assert len(nums) == 1000
     assert nums.dtype == np.dtype('float')
     assert nums.max() >= 0
@@ -106,13 +106,46 @@ def test_date_data():
 def test_date_data_between():
     dates = types.date_data(
         length=1000,
-        datetime_start=datetime.datetime(2000, 1, 1),
-        datetime_end=datetime.datetime(2000, 12, 31))
+        begin=datetime.datetime(2000, 1, 1),
+        end=datetime.datetime(2000, 12, 31))
     assert len(dates) == 1000
     assert len(dates.unique()) > 1
     assert dates.min() >= datetime.datetime(2000, 1, 1)
     assert dates.max() < datetime.datetime(2001, 1, 1)
     assert dates.dtype == np.dtype('<M8[ns]')
+    dates = types.date_data(
+        length=1000,
+        begin=datetime.date(2000, 1, 1),
+        end=datetime.date(2000, 12, 31))
+    assert len(dates) == 1000
+    assert len(dates.unique()) > 1
+    assert dates.min() >= datetime.datetime(2000, 1, 1)
+    assert dates.max() < datetime.datetime(2001, 1, 1)
+    assert dates.dtype == np.dtype('<M8[ns]')
+
+def test_date_data_between_text():
+    dates = types.date_data(
+        length=1000,
+        begin='2017-01-01',
+        end='2017-05-31')
+    assert len(dates) == 1000
+    assert len(dates.unique()) > 1
+    assert dates.min() >= datetime.datetime(2017, 1, 1)
+    assert dates.max() < datetime.datetime(2017, 6, 1)
+    assert dates.dtype == np.dtype('<M8[ns]')
+
+def test_date_data_bad_calls():
+    with pytest.raises(ValueError):
+        dates = types.date_data(length=10, begin='217-01-01', end='217-05-31')
+    with pytest.raises(ValueError):
+        dates = types.date_data(length=1000, begin='2017-01-01')
+    with pytest.raises(ValueError):
+        dates = types.date_data(length=1000, begin=datetime.date(2000, 1, 1))
+    with pytest.raises(ValueError):
+        dates = types.date_data(length=1000, end='2017-01-01')
+    with pytest.raises(ValueError):
+        dates = types.date_data(length=1000, end=datetime.date(2000, 1, 1))
+
 
 def test_coords_data():
     coords = types.coords_data(10)

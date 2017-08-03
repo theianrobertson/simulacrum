@@ -9,6 +9,7 @@ import pandas as pd
 from faker import Faker
 
 FAKE = Faker()
+DT_CLASSES = (datetime.datetime, datetime.date)
 
 def name_data(length):
     """Faker names series"""
@@ -30,12 +31,13 @@ def num_int(length, minimum=0, maximum=100):
     """Random integers"""
     return pd.Series(np.random.random_integers(minimum, maximum, length))
 
-def norm_data(length, mean=0, stdev=1):
+def norm_data(length, mean=0, sd=1):
     """Normal distribution data"""
-    return pd.Series(np.random.normal(mean, stdev, length))
+    return pd.Series(np.random.normal(mean, sd, length))
 
-def exp_data(length, scale=1.0):
+def exp_data(length, lam=1.0):
     """Exponential distribution data"""
+    scale = 1.0 / lam
     return pd.Series(np.random.exponential(scale, length))
 
 def binom_data(length, n=100, p=0.1):
@@ -45,15 +47,37 @@ def binom_data(length, n=100, p=0.1):
 def poisson_data(length, lam=1.0):
     return pd.Series(np.random.poisson(lam, length))
 
-def date_data(length, datetime_start=None, datetime_end=None, tzinfo=None):
+def date_data(length, begin=None, end=None, tzinfo=None):
     """dates between a start and end.  If no start and end are provided,
-    default to one year ago and today."""
-    if datetime_start is None and datetime_end is None:
+    default to one year ago and today.
+
+    Parameters
+    ----------
+    begin : datetime.datetime, datetime.date or str, optional
+        Beginning datetime - will attempt to parse as yyyy-mm-dd if string.  If
+        not provided will default to today's date minus 365 days.
+    end : datetime.datetime, datetime.date or str, optional
+        Ending datetime - will attempt to parse as yyyy-mm-dd is string.  If
+        not provided will default to today's date.
+    tzinfo : timezone, instance of datetime.tzinfo subclass
+        Optional timezone
+    """
+    if begin is None and end is None:
         datetime_end = datetime.datetime.now()
         datetime_start = datetime_end - datetime.timedelta(365)
+    elif isinstance(begin, DT_CLASSES) and isinstance(end, DT_CLASSES):
+        datetime_end = end
+        datetime_start = begin
+    else:
+        try:
+            datetime_start = datetime.datetime.strptime(begin, '%Y-%m-%d')
+            datetime_end = datetime.datetime.strptime(end, '%Y-%m-%d')
+        except:
+            logging.error('Bad date format, expected yyyy-mm-dd!')
+            raise ValueError('Could not parse dates')
     return pd.Series(
         [FAKE.date_time_between_dates(
-            datetime_start, datetime_end, tzinfo) for _ in range(length)])
+            datetime_start, datetime_end) for _ in range(length)])
 
 def coords_data(length, lat_min=-90, lat_max=90, lon_min=-180, lon_max=180):
     """Geographic coordinates"""
