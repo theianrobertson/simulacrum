@@ -1,4 +1,4 @@
-"""Functions for generating random data."""
+"""Functions for creating a dataframe based on setup dictionaries"""
 
 import logging
 import pandas as pd

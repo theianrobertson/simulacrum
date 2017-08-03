@@ -1,3 +1,5 @@
+"""Functions for generating random data."""
+
 from uuid import uuid4
 import logging
 import sys
