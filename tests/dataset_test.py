@@ -51,3 +51,13 @@ def test_create_passthrough_params():
     assert test_df['int'].max() <= 100
     lengths = test_df['txt'].apply(lambda x: len(x))
     assert lengths.max() <= 20
+
+
+def test_create_passthrough_bad_params():
+    with pytest.raises(TypeError):
+        test_df = create(
+            length=1000,
+            coltypes={
+                'int': {'type': 'int', 'minimum': 10, 'bad_param': -999},
+                'txt': {'type': 'txt', 'max_nb_chars': 20}
+                })

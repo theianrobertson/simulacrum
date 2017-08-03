@@ -48,6 +48,8 @@ def test_text_data():
     assert len(text_max_10) == 10
     lengths = text_max_10.apply(lambda x: len(x))
     assert lengths.max() <= 10
+    with pytest.raises(TypeError):
+        text = types.text_data(10, bad_param=100)
 
 def test_address_data():
     addresses = types.address_data(10)
@@ -55,6 +57,8 @@ def test_address_data():
     assert addresses.dtype == np.dtype('O')
     for item in addresses:
         assert isinstance(item, str)
+    with pytest.raises(TypeError):
+        addresses = types.address_data(10, bad_param=100)
 
 def test_num_data():
     nums = types.num_data(1000, minimum=0, maximum=1)
@@ -62,6 +66,8 @@ def test_num_data():
     assert nums.max() <= 1
     assert nums.min() >= 0
     assert nums.dtype == np.dtype('float')
+    with pytest.raises(TypeError):
+        nums = types.num_data(10, minimum=0, bad_param=100)
 
 def test_num_int():
     nums = types.num_int(1000, minimum=0, maximum=100)
