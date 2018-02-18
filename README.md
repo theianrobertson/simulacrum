@@ -1,11 +1,11 @@
-### Simulacrum
+# Simulacrum
+
 Simulacrum is a simple way to pass in a dictionary object, with column names and corresponding data types and output a pandas DataFrame of random data. This is great for creating a fake data set or testing a data science script whose validity through generalization needs to be tested. This is still a work in progress. Right now, numerical data can be made to fit a common statistical distribution so long as the proper statistical parameters are included with the type key in the dictionary.
 
-simulacrum fulfills the following use cases:
+Simulacrum fulfills the following use cases:
 - When data is needed for a tutorial, in order to train a model perfectly
 - When real data that is well understood cannot be gathered fast enough, but can be simulated quickly
-- to develop test case datasets for testing machine learning pipelines and applications on more generalizable data
-
+- To develop test case datasets for testing machine learning pipelines and applications on more generalizable data
 
 For instance, companies that operate primarily as brick and mortars cannot gather data at
 the same rate as ecommerce companies typically. Gathering customer data may take months. Therefore the data to develop machine learning applications may not exist at
@@ -22,14 +22,13 @@ $ pip install simulacrum
 ### Usage
 To create a fake pandas dataframe consisting of 100 rows. we would do the following:
 ```python
+>>> import simulacrum as sm
+>>> test = {'entries': {'type': 'exp', 'lam': 0.5},
+...        'names': {'type': 'name'},
+...        'salaries': {'type': 'norm', 'mean': 55000, 'sd': 20000}}
 
-import simulacrum as sm
+>>> res = sm.create(100, coltypes=test)
 
-test = {'entries': {'type': 'exp', 'lam': 0.5},
-        'names': {'type': 'name'},
-        'salaries': {'type': 'norm', 'mean': 55000, 'sd': 20000}}
-
-res = sm.create(100, coltypes=test)
 ```
 For the test variable which will be passed as coltypes, each key corresponds to the column name. Each value must be a dictionary
 with one key being type and then whatever statistical parameters if any correspond to that type. Please review source code to
