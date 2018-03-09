@@ -61,16 +61,16 @@ def test_address_data():
         addresses = types.address_data(10, bad_param=100)
 
 def test_num_data():
-    nums = types.num_data(1000, minimum=0, maximum=1)
+    nums = types.num_data(1000, min=0, max=1)
     assert len(nums) == 1000
     assert nums.max() <= 1
     assert nums.min() >= 0
     assert nums.dtype == np.dtype('float')
     with pytest.raises(TypeError):
-        nums = types.num_data(10, minimum=0, bad_param=100)
+        nums = types.num_data(10, min=0, bad_param=100)
 
 def test_num_int():
-    nums = types.num_int(1000, minimum=0, maximum=100)
+    nums = types.num_int(1000, min=0, max=100)
     assert len(nums) == 1000
     assert nums.max() <= 100
     assert nums.min() >= 0
@@ -102,7 +102,7 @@ def test_date_data():
     assert len(dates) == 1000
     assert len(dates.unique()) > 1
     assert dates.dtype == np.dtype('<M8[ns]')
-    
+
 def test_date_data_between():
     dates = types.date_data(
         length=1000,
@@ -161,3 +161,46 @@ def test_coords_data():
         coords = types.coords_data(10, lon_min=-181)
     with pytest.raises(ValueError):
         coords = types.coords_data(10, lon_max=181)
+
+def test_faker_bad_form():
+    """Test faker data."""
+    with pytest.raises(KeyError):
+        bad_series = types.faker_data(**{"network": False}, length=23)
+    with pytest.raises(AttributeError):
+        bad_series = types.faker_data(**{"provider": "some_bad_thing", "network": False}, length=23)
+
+@pytest.mark.parametrize('function',
+    [types.num_data,
+    types.num_int,
+    types.norm_data,
+    types.exp_data,
+    types.binom_data,
+    types.poisson_data
+    ])
+def test_null_mask_numeric(function):
+    results = types.null_mask(100, function, 0.25)
+    assert sum(results.isnull()) == 25
+    assert results.dtype == np.dtype('float') #They will be floated
+    results = types.null_mask(100, function, 0)
+    assert sum(results.isnull()) == 0
+
+@pytest.mark.parametrize('function',
+    [types.text_data,
+    types.name_data,
+    types.address_data,
+    types.coords_data,
+    types.uuid_data
+    ])
+def test_null_mask_object(function):
+    results = types.null_mask(100, function, 0.25)
+    assert sum(results.isnull()) == 25
+    assert results.dtype == np.dtype('O')
+    results = types.null_mask(100, function, 0)
+    assert sum(results.isnull()) == 0
+
+def test_null_mask_date():
+    results = types.null_mask(100, types.date_data, 0.25)
+    assert sum(results.isnull()) == 25
+    assert results.dtype == np.dtype('<M8[ns]')
+    results = types.null_mask(100, types.date_data, 0)
+    assert sum(results.isnull()) == 0

@@ -13,32 +13,52 @@ present but the company may have a general understanding of the shape of this da
 trained on this simulated data and a machine learning application can be developed in parallel to gathering real data! This
 hopefully engineers scalability and foresight for companies with slow data velocity.
 
-### Installation
+## Installation
 
 ```
 $ pip install simulacrum
 ```
 
-### Usage
-To create a fake pandas dataframe consisting of 100 rows. we would do the following:
+## Usage
 ```python
->>> import simulacrum as sm
->>> test = {'entries': {'type': 'exp', 'lam': 0.5},
-...        'names': {'type': 'name'},
-...        'salaries': {'type': 'norm', 'mean': 55000, 'sd': 20000}}
+import simulacrum as sm
+types = {
+    'entries': {'type': 'exp', 'lam': 0.5},
+    'names': {'type': 'name'},
+    'salaries': {'type': 'norm', 'mean': 55000, 'sd': 20000}}
 
->>> res = sm.create(100, coltypes=test)
+res = sm.create(length=100, coltypes=types)
+print(res.head())
 
+#     entries           names       salaries
+# 0  0.453003    Terri Fisher   65471.389461
+# 1  0.247907    William West   53718.937276
+# 2  2.637221    John Johnson   52750.467547
+# 3  1.403986       Nancy Kim   50436.549855
+# 4  0.437987  Jennifer Moses  116760.941144
 ```
-For the test variable which will be passed as coltypes, each key corresponds to the column name. Each value must be a dictionary
-with one key being type and then whatever statistical parameters if any correspond to that type. Please review source code to
-see how to properly pass the correct keys and values. Possible types are as follows:
+The `coltypes` parameter is a dict, where the keys are column names, and the
+values are dicts with keys `type` and then whatever parameters the type takes. 
+Please review source code to see how to properly pass the correct keys and
+values. Possible values for the `type` parameter are as follows:
 
-`{'num': num_data, 'int': num_int, 'norm': norm_data, 'exp': exp_data, 'bin': binom_data, 'pois': poisson_data, 'txt': text_data, 'name': name_data, 'addr': address_data, 'date': date_data, 'coords': coords_data, 'uuid': uuid_data, 'faker': faker_data}`
+type|Description|Parameters
+---|---|---
+num|Random floats from a uniform distribution|`min=0`, `max=1`
+int|Random integers from a uniform distribution|`min=0`, `max=100`
+norm|Random floats from a normal distribution|`mean=0`, `sd=1`
+exp|Random floats from an exponential distribution|`lam=1.0`
+bin|Random integers from a binomial distribution|`n=100`,`p=0.1`
+pois|Random integers from a Poisson distribution|`lam=1.0`
+txt|Faker text - sequences of lorem ipsum-style text|`max_nb_chars=200`
+name|Faker name - random full names|
+addr|Faker address - random full addresses|
+date|Dates between begin and end.  If no begin/end are provided, default to the past year.|`begin=None`, `end=None`, `tzinfo=None`
+coords|Random tuples of floats from uniform 2D distribution|`lat_min=-90`, `lat_max=90`, `lon_min=-180`, `lon_max=180`
+uuid|Randomly selected UUIDs|
+faker|Custom faker field - see below|`provider`, `kwargs`
 
-Each key corresponds to a possible type, and the value is the function called in the source.
-
-We can also use the ColTypes class to create the coltypes dict with function calls.
+We can also use the ColTypes class to create the coltypes dict with function calls:
 
 ```python
 
@@ -53,7 +73,7 @@ col_types.add_coltype('ips', 'faker', provider='ipv6')
 data_set = sm.create(1000, coltypes=col_types.get_coltypes())
 ```
 
-For a quick demonstration, if you don't specify any types a dataframe is created with one of each of the available types:
+If you don't specify any types, a dataframe is created with one of each of the available types:
 
 ```python
 import simulacrum as sm
@@ -74,37 +94,33 @@ list(df.iterrows())[0][1]
 #Name: 0, dtype: object
 ```
 
-#### faker type:
+### Faker type
 
-If you want to use other data types not allowed in simulacrum by default, you can use the `faker` type to use each data type provided by the awesome faker library.
+If you want to use other data types not allowed in simulacrum by default, you can use the `faker` type to use each data type provided by the awesome faker library: https://faker.readthedocs.io/en/latest/providers.html
 
-**List of faker data types : https://faker.readthedocs.io/en/latest/providers.html**
-
-To use the faker type, you have to pass the provider name and optional args like that:
+To use the faker type, you must pass the provider name and optional args like:
 
 ```python
 faker_examples = {
-        # same as fake.simple_profile(sex='F')
-        'names': {'type': 'faker', 'provider': 'simple_profile', 'sex': 'F'},
-        # same as fake.ipv6()
-        'ips': {'type': 'faker', 'provider': 'ipv6'},
-        # same as fake.job()
-        'jobs': {'type': 'faker', 'provider': 'job'},
-        # same as fake.pydict(nb_elements=10, variable_nb_elements=True)
-        'metadata': {'type': 'faker', 'provider': 'pydict', 'nb_elements': 10, 'variable_nb_elements': True}
+    # same as fake.simple_profile(sex='F')
+    'names': {'type': 'faker', 'provider': 'simple_profile', 'sex': 'F'},
+    # same as fake.ipv6()
+    'ips': {'type': 'faker', 'provider': 'ipv6'},
+    # same as fake.job()
+    'jobs': {'type': 'faker', 'provider': 'job'},
+    # same as fake.pydict(nb_elements=10, variable_nb_elements=True)
+    'metadata': {'type': 'faker', 'provider': 'pydict', 'nb_elements': 10, 'variable_nb_elements': True},
+    'zips': {'type': 'faker', 'provider': 'zipcode'}
 }
+df = sm.create(coltypes=faker_examples)
 
 # Or with ColTypes
 col_types.add_coltype('ids', 'faker', provider='pydict', nb_elements=10, variable_nb_elements=True)
 ```
 
 ### TODO
-- Add a error handling and validation for date_data function
-- Add a function for fake coordinates
-- Add a function for fake zipcodes
 - Add a function for fake categorical variables
-- Add Try Except blocks to all functions to log errors when params passed in dict dont match expected params
-
+- Handle random seeds some way
 
 ### Development
 

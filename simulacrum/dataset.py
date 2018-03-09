@@ -3,25 +3,25 @@
 import logging
 import pandas as pd
 
-from simulacrum import types
+from simulacrum import types as sim_types
 
 TYPE_FUNCTIONS = {
-    'num': types.num_data,
-    'int': types.num_int,
-    'norm': types.norm_data,
-    'exp': types.exp_data,
-    'bin': types.binom_data,
-    'pois': types.poisson_data,
-    'txt': types.text_data,
-    'name': types.name_data,
-    'addr': types.address_data,
-    'date': types.date_data,
-    'coords': types.coords_data,
-    'uuid': types.uuid_data,
-    'faker': types.faker_data}
+    'num': sim_types.num_data,
+    'int': sim_types.num_int,
+    'norm': sim_types.norm_data,
+    'exp': sim_types.exp_data,
+    'bin': sim_types.binom_data,
+    'pois': sim_types.poisson_data,
+    'txt': sim_types.text_data,
+    'name': sim_types.name_data,
+    'addr': sim_types.address_data,
+    'date': sim_types.date_data,
+    'coords': sim_types.coords_data,
+    'uuid': sim_types.uuid_data,
+    'faker': sim_types.faker_data}
 
 
-def create(length=100, cols=None, types=None, coltypes=None):
+def create(length=100, cols=None, types=None, coltypes=None, null_rate=0):
     """Create a dataset based on passed in information.
 
     A user must either pass in cols and types lists, OR coltypes, OR the
@@ -39,6 +39,15 @@ def create(length=100, cols=None, types=None, coltypes=None):
     coltypes : dict, optional
         A combined version of cols and types, where the keys of the dictionary
         are cols, and the values are type dictionaries.
+    null_rate : float, optional default 0
+        An optional null rate between 0 and 1 to apply to the entire dataframe.  You can also pass
+        a null_rate as a parameter on any type dictionary to override (or only set that column to
+        null).
+
+    Returns
+    -------
+    pandas.DataFrame
+        The generated dataframe.
     """
     if cols and types and coltypes:
         raise ValueError(
@@ -59,9 +68,9 @@ def create(length=100, cols=None, types=None, coltypes=None):
     series_res = {}
     for col, type_dict in zip(column_iter, type_iter):
         validate_type_dict(type_dict)
-        data_builder = TYPE_FUNCTIONS[type_dict['type']]
-        del type_dict['type']
-        series_res[col] = data_builder(length, **type_dict)
+        series_null_rate = type_dict.pop('null_rate', null_rate)
+        data_builder = TYPE_FUNCTIONS[type_dict.pop('type')]
+        series_res[col] = sim_types.null_mask(length, data_builder, series_null_rate, **type_dict)
 
     return pd.DataFrame(series_res)
 
@@ -73,6 +82,11 @@ def validate_type_dict(type_dict):
     ----------
     type_dict : dict
         Dictionary defining the type to be used for mocking data.
+
+    Raises
+    ------
+    ValueError
+        If the type_dict doesn't pass validations
     """
     if "type" not in type_dict:
         logging.error('Missing "type": %s', str(type_dict))
@@ -83,7 +97,7 @@ def validate_type_dict(type_dict):
 
 def default_coltypes():
     """Sets up the default column types
-    
+
     Returns
     -------
     dict
