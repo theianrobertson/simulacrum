@@ -3,7 +3,7 @@
 
 import pytest
 
-from simulacrum.dataset import *
+from simulacrum.dataset import create, validate_type_dict, default_coltypes, TYPE_FUNCTIONS
 
 def test_validate_type_dict():
     for value in ('num','int','norm','exp','bin','pois','txt','name','addr',
@@ -42,7 +42,7 @@ def test_create_passthrough_params():
     test_df = create(
         length=1000,
         coltypes={
-            'int': {'type': 'int', 'minimum': 10},
+            'int': {'type': 'int', 'min': 10},
             'txt': {'type': 'txt', 'max_nb_chars': 20}
             })
     assert len(test_df) == 1000
@@ -58,6 +58,6 @@ def test_create_passthrough_bad_params():
         test_df = create(
             length=1000,
             coltypes={
-                'int': {'type': 'int', 'minimum': 10, 'bad_param': -999},
+                'int': {'type': 'int', 'min': 10, 'bad_param': -999},
                 'txt': {'type': 'txt', 'max_nb_chars': 20}
                 })

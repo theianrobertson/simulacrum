@@ -22,13 +22,13 @@ def address_data(length):
     """Faker address series"""
     return pd.Series([FAKE.address() for _ in range(length)])
 
-def num_data(length, minimum=0, maximum=1):
+def num_data(length, min=0, max=1):
     """Uniform distribution"""
-    return pd.Series(np.random.uniform(minimum, maximum, length))
+    return pd.Series(np.random.uniform(min, max, length))
 
-def num_int(length, minimum=0, maximum=100):
+def num_int(length, min=0, max=100):
     """Random integers"""
-    return pd.Series(np.random.random_integers(minimum, maximum, length))
+    return pd.Series(np.random.random_integers(min, max, length))
 
 def norm_data(length, mean=0, sd=1):
     """Normal distribution data"""
@@ -47,7 +47,7 @@ def poisson_data(length, lam=1.0):
     return pd.Series(np.random.poisson(lam, length))
 
 def date_data(length, begin=None, end=None, tzinfo=None):
-    """dates between a start and end.  If no start and end are provided,
+    """Dates between a start and end.  If no start and end are provided,
     default to one year ago and today.
 
     Parameters
@@ -79,7 +79,21 @@ def date_data(length, begin=None, end=None, tzinfo=None):
             datetime_start, datetime_end) for _ in range(length)])
 
 def coords_data(length, lat_min=-90, lat_max=90, lon_min=-180, lon_max=180):
-    """Geographic coordinates"""
+    """Randomly-selected geographic coordinates
+    
+    Parameters
+    ----------
+    length : int
+        Length of the series
+    lat_min : numeric, optional
+        Minimum latitude
+    lat_max : numeric, optional
+        Maximum latitude
+    lon_min : numeric, optional
+        Minimum longitude
+    lon_max : numeric, optional
+        Maximum longitude
+    """
     if lat_min < -90 or lat_max > 90 or lat_min > lat_max:
         raise ValueError(
             'lat ranges unacceptable; not in [-90, 90] or lat_min > lat_max')
@@ -90,35 +104,61 @@ def coords_data(length, lat_min=-90, lat_max=90, lon_min=-180, lon_max=180):
                          np.random.uniform(lat_min, lat_max, length))))
 
 def uuid_data(length):
-    """
-    Generate a column of random uuids.
+    """Generate a column of random uuids.
 
-    :param length: The number of uuids.
-    :type length: int.
-    :return: The column of uuids.
-    :rtype: pd.Series
-
+    Parameters
+    ----------
+    length : int
+        Length of the series
+    
+    Returns
+    -------
+    pandas.Series
+        The column of uuids.
     """
     return pd.Series(list(map(lambda _: uuid4(), range(length))))
 
 
 def faker_data(length, **kwargs):
-    """
-    Generate a column based on any faker data type.
+    """Generate a column based on any faker data type.
 
-    :param kwargs: A configuration for the faker data. Must contain faker provider and related args as dict.
-    :param length: The number of rows wanted.
-    :type length: int.
-    :return: The column of Faker data.
-    :rtype: pd.Series
+    Parameters
+    ----------
+    length : int
+        Length of the series to return
+    kwargs : dict
+        A configuration for the faker data. Must contain at least provider () and related args as
+        dict.
 
+    Returns
+    -------
+    pandas.Series
     """
     try:
         provider = kwargs["provider"]
         del kwargs["provider"]
-        return pd.Series(list(map(
-            lambda _: getattr(FAKE, provider)(**kwargs), range(length))))
+        func = getattr(FAKE, provider)
     except KeyError:
         raise KeyError("You have to define the Faker provider.")
     except AttributeError:
         raise AttributeError("Faker().{}() is not a valid Faker provider.".format(provider))
+    return pd.Series(map(lambda _: func(**kwargs), range(length)))
+
+
+def null_mask(length, type_function, null_rate=0, **kwargs):
+    """Masks out a random subset of series values with Numpy nulls (np.nan).  The number of null
+    values will be int(null_rate * length)
+    
+    Parameters
+    ----------
+    type_function : function
+        A function which returns a Pandas series
+    null_rate : float, optional
+        Optional null rate between 0 and 1 inclusive.
+    """
+    if not 0 <= null_rate <= 1:
+        raise ValueError('null_rate must be between 0 and 1')
+    results = type_function(length, **kwargs)
+    sample_index = results.sample(int(null_rate * length)).index
+    results.loc[results.index.isin(sample_index)] = np.nan
+    return results
