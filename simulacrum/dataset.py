@@ -18,8 +18,17 @@ TYPE_FUNCTIONS = {
     'date': sim_types.date_data,
     'coords': sim_types.coords_data,
     'uuid': sim_types.uuid_data,
+    'categorical': sim_types.categorical_data,
     'faker': sim_types.faker_data}
 
+def help_type(function_name=None):
+    to_print = TYPE_FUNCTIONS.items()
+    if function_name:
+        to_print = [(function_name, TYPE_FUNCTIONS[function_name])]
+    for function_name, function in to_print:
+        print(
+            'Name: {}, Function: simulacrum.types.{}'.format(function_name, function.__name__))
+        print(function.__doc__ + '\n')
 
 def create(length=100, cols=None, types=None, coltypes=None, null_rate=0):
     """Create a dataset based on passed in information.

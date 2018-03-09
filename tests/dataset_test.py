@@ -3,7 +3,7 @@
 
 import pytest
 
-from simulacrum.dataset import create, validate_type_dict, default_coltypes, TYPE_FUNCTIONS
+from simulacrum.dataset import create, validate_type_dict, default_coltypes, TYPE_FUNCTIONS, help_type
 
 def test_validate_type_dict():
     for value in ('num','int','norm','exp','bin','pois','txt','name','addr',
@@ -61,3 +61,7 @@ def test_create_passthrough_bad_params():
                 'int': {'type': 'int', 'min': 10, 'bad_param': -999},
                 'txt': {'type': 'txt', 'max_nb_chars': 20}
                 })
+
+def test_help_type():
+    #Just call it to make sure it's working
+    help_type()
