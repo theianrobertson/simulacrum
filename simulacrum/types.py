@@ -15,7 +15,15 @@ def name_data(length):
     return pd.Series([FAKE.name() for _ in range(length)])
 
 def text_data(length, max_nb_chars=200):
-    """Faker text series"""
+    """Faker text series
+
+    Parameters
+    ----------
+    length : int
+        Length of the returned Series
+    max_nb_chars : int, optional
+        Maximum number of characters in the text data, defaults to 200
+    """
     return pd.Series([FAKE.text(max_nb_chars) for _ in range(length)])
 
 def address_data(length):
@@ -23,15 +31,45 @@ def address_data(length):
     return pd.Series([FAKE.address() for _ in range(length)])
 
 def num_data(length, min=0, max=1):
-    """Uniform distribution"""
+    """Uniform distribution
+
+    Parameters
+    ----------
+    length : int
+        Length of the returned Series
+    min : numeric, optional
+        Minimum value, defaults to 0
+    max : numeric, optional
+        Maximum value, defaults to 1
+    """
     return pd.Series(np.random.uniform(min, max, length))
 
 def num_int(length, min=0, max=100):
-    """Random integers"""
+    """Random integers
+
+    Parameters
+    ----------
+    length : int
+        Length of the returned Series
+    min : int, optional
+        Minimum value, defaults to 0
+    max : int, optional
+        Maximum value, defaults to 100
+    """
     return pd.Series(np.random.random_integers(min, max, length))
 
 def norm_data(length, mean=0, sd=1):
-    """Normal distribution data"""
+    """Normal distribution data
+
+    Parameters
+    ----------
+    length : int
+        Length of the returned Series
+    mean : numeric, optional
+        Mean of the normal distribution, defaults to 0
+    sd : numeric, optional
+        Standard deviation of the distribution, defaults to 1
+    """
     return pd.Series(np.random.normal(mean, sd, length))
 
 def exp_data(length, lam=1.0):
@@ -40,10 +78,29 @@ def exp_data(length, lam=1.0):
     return pd.Series(np.random.exponential(scale, length))
 
 def binom_data(length, n=100, p=0.1):
-    """Binomial distribution data"""
+    """Binomial distribution data
+
+    Parameters
+    ----------
+    length : int
+        Length of the returned Series
+    n : int, optional
+        Optional number of experiments, defaults to 100
+    p : float, optional
+        Probability of a successful experiment, defaults to 0.1
+    """
     return pd.Series(np.random.binomial(n, p, length))
 
 def poisson_data(length, lam=1.0):
+    """Poisson distribution data
+
+    Parameters
+    ----------
+    length : int
+        Length of the returned Series
+    lam : float, optional
+        Expectation of interval
+    """
     return pd.Series(np.random.poisson(lam, length))
 
 def date_data(length, begin=None, end=None, tzinfo=None):
@@ -80,7 +137,7 @@ def date_data(length, begin=None, end=None, tzinfo=None):
 
 def coords_data(length, lat_min=-90, lat_max=90, lon_min=-180, lon_max=180):
     """Randomly-selected geographic coordinates
-    
+
     Parameters
     ----------
     length : int
@@ -110,7 +167,7 @@ def uuid_data(length):
     ----------
     length : int
         Length of the series
-    
+
     Returns
     -------
     pandas.Series
@@ -127,7 +184,7 @@ def faker_data(length, **kwargs):
     length : int
         Length of the series to return
     kwargs : dict
-        A configuration for the faker data. Must contain at least provider () and related args as
+        A configuration for the faker data. Must contain at least provider and related args as
         dict.
 
     Returns
@@ -145,10 +202,31 @@ def faker_data(length, **kwargs):
     return pd.Series(map(lambda _: func(**kwargs), range(length)))
 
 
+def categorical_data(length, elements=[1,2,3], weights=None):
+    """Generate a categorical field based on a list of values and optional weights
+
+    Parameters
+    ----------
+    length : int
+        Length of the series
+    elements : list, optional
+        List of values to be selected from.  Defaults to [1,2,3] for argument's sake
+    weights : list, optional
+        Optional list of numeric weights.  Must be the same length as values.  If not provided,
+        equal weights will be given to all categories.
+
+    Returns
+    -------
+    pandas.Series
+        Randomly selected categorical variables.
+    """
+    return pd.Series(np.random.choice(elements, size=length, p=weights), dtype='category')
+
+
 def null_mask(length, type_function, null_rate=0, **kwargs):
     """Masks out a random subset of series values with Numpy nulls (np.nan).  The number of null
     values will be int(null_rate * length)
-    
+
     Parameters
     ----------
     type_function : function

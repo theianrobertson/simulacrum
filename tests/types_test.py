@@ -3,6 +3,7 @@ import pytest
 from uuid import UUID
 from functools import reduce
 import numpy as np
+import pandas as pd
 
 from simulacrum import types
 from simulacrum import dataset
@@ -169,6 +170,17 @@ def test_faker_bad_form():
     with pytest.raises(AttributeError):
         bad_series = types.faker_data(**{"provider": "some_bad_thing", "network": False}, length=23)
 
+def test_categorical_data():
+    results = types.categorical_data(100, elements=[1,2,3])
+    assert results.isin([1,2,3]).sum() == 100
+    assert isinstance(results.dtype, pd.core.dtypes.dtypes.CategoricalDtype)
+    results = types.categorical_data(100, elements=[1,2,3], weights=[0,0.5,0.5])
+    assert results.isin([2,3]).sum() == 100
+    assert isinstance(results.dtype, pd.core.dtypes.dtypes.CategoricalDtype)
+    results = types.categorical_data(100, elements=[1,2,3,'hello!'])
+    assert results.isin(['1','2','3','hello!']).sum() == 100
+    assert isinstance(results.dtype, pd.core.dtypes.dtypes.CategoricalDtype)
+
 @pytest.mark.parametrize('function',
     [types.num_data,
     types.num_int,
@@ -203,4 +215,11 @@ def test_null_mask_date():
     assert sum(results.isnull()) == 25
     assert results.dtype == np.dtype('<M8[ns]')
     results = types.null_mask(100, types.date_data, 0)
+    assert sum(results.isnull()) == 0
+
+def test_null_mask_categorical():
+    results = types.null_mask(100, types.categorical_data, 0.25, elements=[1,2,3])
+    assert sum(results.isnull()) == 25
+    assert isinstance(results.dtype, pd.core.dtypes.dtypes.CategoricalDtype)
+    results = types.null_mask(100, types.categorical_data, 0, elements=[1,2,3])
     assert sum(results.isnull()) == 0

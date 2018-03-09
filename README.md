@@ -56,7 +56,18 @@ addr|Faker address - random full addresses|
 date|Dates between begin and end.  If no begin/end are provided, default to the past year.|`begin=None`, `end=None`, `tzinfo=None`
 coords|Random tuples of floats from uniform 2D distribution|`lat_min=-90`, `lat_max=90`, `lon_min=-180`, `lon_max=180`
 uuid|Randomly selected UUIDs|
+categorical|Categorical values from a list of entries with optional weights|`entries=[1,2,3]`, `weights`
 faker|Custom faker field - see below|`provider`, `kwargs`
+
+For more information about a type, you can run:
+
+```python
+sm.help_type('exp')
+# This prints out the docstrings for the exponential distribution function, including any parameters
+
+sm.help_type()
+# This prints out the docstrings for all available types
+```
 
 We can also use the ColTypes class to create the coltypes dict with function calls:
 
